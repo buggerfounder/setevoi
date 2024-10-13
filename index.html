@@ -4,48 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система оценок</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            text-align: center;
-            font-size: 16px;
-        }
-        button {
-            margin-top: 20px;
-            padding: 10px;
-            font-size: 16px;
-        }
-        #status {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-        #guest-btn {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f2f2f2;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css"> <!-- Подключение CSS -->
 </head>
 <body>
 
@@ -59,7 +18,6 @@
     <label for="password">Пароль:</label>
     <input type="password" id="password"><br>
     <button onclick="adminLogin()">Войти</button>
-    <div id="login-status"></div>
     <button id="guest-btn" onclick="guestLogin()">Войти как гость</button>
 </div>
 
@@ -100,15 +58,14 @@
         </tbody>
     </table>
 
-    <button id="save-btn" onclick="saveGrades()">Сохранить оценки</button>
+    <button id="save-btn" onclick="saveGrades()" style="display: none;">Сохранить оценки</button>
     <div id="status"></div>
 </div>
 
 <script>
-    const ADMIN_LOGIN = "admin";
-    const ADMIN_PASSWORD = "password";
+    const ADMIN_LOGIN = "Cobaken555";
+    const ADMIN_PASSWORD = "Mazda371";
 
-    // Вход для администратора
     function adminLogin() {
         const login = document.getElementById("login").value;
         const password = document.getElementById("password").value;
@@ -117,30 +74,72 @@
             document.getElementById("login-form").style.display = "none";
             document.getElementById("grades-section").style.display = "block";
             document.getElementById("save-btn").style.display = "block";
+            toggleInputs(false);  // Разрешаем редактирование
             displayStatus("Вы вошли как администратор", true);
         } else {
             displayStatus("Неверный логин или пароль", false);
         }
     }
 
-    // Вход для гостя
     function guestLogin() {
         document.getElementById("login-form").style.display = "none";
         document.getElementById("grades-section").style.display = "block";
+        toggleInputs(true);  // Блокируем редактирование для гостя
         displayStatus("Вы вошли как гость", true);
     }
 
-    // Сохранение оценок
+    function toggleInputs(disabled) {
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.disabled = disabled;
+        });
+    }
+
     function saveGrades() {
+        const inputs = document.querySelectorAll('input[type="number"]');
+        const grades = {};
+
+        inputs.forEach(input => {
+            const name = input.getAttribute('data-name');
+            const date = input.getAttribute('data-date');
+            const value = input.value;
+
+            if (!grades[name]) {
+                grades[name] = {};
+            }
+            grades[name][date] = value;
+        });
+
+        localStorage.setItem('grades', JSON.stringify(grades));
         displayStatus("Оценки сохранены!", true);
     }
 
-    // Отображение статуса
+    function loadGrades() {
+        const savedGrades = localStorage.getItem('grades');
+        if (savedGrades) {
+            const grades = JSON.parse(savedGrades);
+            const inputs = document.querySelectorAll('input[type="number"]');
+
+            inputs.forEach(input => {
+                const name = input.getAttribute('data-name');
+                const date = input.getAttribute('data-date');
+                if (grades[name] && grades[name][date]) {
+                    input.value = grades[name][date];
+                }
+            });
+        }
+    }
+
     function displayStatus(message, success) {
         const statusDiv = document.getElementById('status');
         statusDiv.innerText = message;
         statusDiv.style.color = success ? 'green' : 'red';
     }
+
+    window.onload = function() {
+        loadGrades();
+        toggleInputs(true);  // По умолчанию все поля заблокированы
+    };
 </script>
 
 </body>
