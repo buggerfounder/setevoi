@@ -24,6 +24,36 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Функция для обновления количества активных пользователей
+        function updateActiveUsers(count) {
+            document.getElementById('active-users').innerText = `Пользователей онлайн: ${count}`;
+        }
+
+        // Функция для увеличения и уменьшения счетчика активных пользователей
+        function updateUserCount(isJoining) {
+            const userRef = db.collection("activeUsers").doc("userCount");
+
+            if (isJoining) {
+                userRef.update({ count: firebase.firestore.FieldValue.increment(1) });
+            } else {
+                userRef.update({ count: firebase.firestore.FieldValue.increment(-1) });
+            }
+        }
+
+        // Функция для получения количества активных пользователей
+        function getActiveUsers() {
+            const userRef = db.collection("activeUsers").doc("userCount");
+            userRef.get().then((doc) => {
+                if (doc.exists) {
+                    updateActiveUsers(doc.data().count);
+                } else {
+                    userRef.set({ count: 0 });
+                }
+            }).catch((error) => {
+                console.error("Ошибка при получении активных пользователей: ", error);
+            });
+        }
+
         // Функция для сохранения оценок
         function saveGrades() {
             const inputs = document.querySelectorAll('input[type="number"]');
@@ -79,15 +109,25 @@
             statusDiv.style.color = success ? 'green' : 'red';
         }
 
-        // Загрузка оценок при загрузке страницы
+        // Загрузка оценок и активных пользователей при загрузке страницы
         window.onload = function() {
             loadGrades();
+            getActiveUsers();
+            updateUserCount(true); // Увеличиваем счетчик при входе
+
+            // Удаляем пользователя из активных при закрытии окна
+            window.addEventListener("beforeunload", () => {
+                updateUserCount(false);
+            });
         };
     </script>
 </head>
 <body>
 
 <h1>Выставление оценок</h1>
+
+<!-- Количество пользователей онлайн -->
+<div id="active-users" style="font-size: 18px; margin-bottom: 20px;"></div>
 
 <!-- Логин для админа -->
 <div id="login-form">
