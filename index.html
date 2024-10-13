@@ -4,30 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система оценок</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Подключение CSS -->
+    <link rel="stylesheet" href="styles.css">
     <!-- Подключение Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
     <script>
-        // Конфигурация Firebase
+        // Ваша конфигурация Firebase
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyCfII279Y-Np3by_EOAu37dUfYe7-APdZg",
+            authDomain: "setevoigorod-7d5a8.firebaseapp.com",
+            projectId: "setevoigorod-7d5a8",
+            storageBucket: "setevoigorod-7d5a8.appspot.com",
+            messagingSenderId: "777501181808",
+            appId: "1:777501181808:web:2ed26464d7f4ad6c25b1b5",
+            measurementId: "G-WNFHGTHGFS"
         };
+
         // Инициализация Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        // Функция для сохранения оценок
+        function saveGrades() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            const grades = {};
+
+            inputs.forEach(input => {
+                const name = input.getAttribute('data-name');
+                const date = input.getAttribute('data-date');
+                const value = input.value;
+
+                if (!grades[name]) {
+                    grades[name] = {};
+                }
+                grades[name][date] = value;
+
+                // Сохранение оценок в Firestore
+                db.collection("grades").doc(name).set(grades[name])
+                    .then(() => {
+                        displayStatus("Оценки сохранены!", true);
+                    })
+                    .catch((error) => {
+                        console.error("Ошибка при сохранении оценок: ", error);
+                        displayStatus("Ошибка при сохранении оценок!", false);
+                    });
+            });
+        }
+
+        // Функция для загрузки оценок из Firestore
+        function loadGrades() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+
+            inputs.forEach(input => {
+                const name = input.getAttribute('data-name');
+                const date = input.getAttribute('data-date');
+
+                db.collection("grades").doc(name).get().then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data[date]) {
+                            input.value = data[date];
+                        }
+                    }
+                }).catch((error) => {
+                    console.error("Ошибка при загрузке оценок: ", error);
+                });
+            });
+        }
+
+        // Отображение статуса
+        function displayStatus(message, success) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = message;
+            statusDiv.style.color = success ? 'green' : 'red';
+        }
+
+        // Загрузка оценок при загрузке страницы
+        window.onload = function() {
+            loadGrades();
+        };
     </script>
 </head>
 <body>
 
-<h1>Система оценок</h1>
+<h1>Выставление оценок</h1>
 
-<!-- Логин для администратора -->
+<!-- Логин для админа -->
 <div id="login-form">
     <h2>Вход для администратора</h2>
     <label for="login">Логин:</label>
@@ -35,6 +97,7 @@
     <label for="password">Пароль:</label>
     <input type="password" id="password"><br>
     <button onclick="adminLogin()">Войти</button>
+    <div id="login-status"></div>
     <button id="guest-btn" onclick="guestLogin()">Войти как гость</button>
 </div>
 
@@ -50,7 +113,7 @@
                 <th>04.10.2024</th>
             </tr>
         </thead>
-        <tbody id="grades-body">
+        <tbody>
             <tr>
                 <td>Есаян Майя</td>
                 <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="01.10.2024"></td>
@@ -78,91 +141,6 @@
     <button id="save-btn" onclick="saveGrades()" style="display: none;">Сохранить оценки</button>
     <div id="status"></div>
 </div>
-
-<script>
-    const ADMIN_LOGIN = "admin"; // Укажите логин администратора
-    const ADMIN_PASSWORD = "password"; // Укажите пароль администратора
-
-    function adminLogin() {
-        const login = document.getElementById("login").value;
-        const password = document.getElementById("password").value;
-
-        if (login === ADMIN_LOGIN && password === ADMIN_PASSWORD) {
-            document.getElementById("login-form").style.display = "none";
-            document.getElementById("grades-section").style.display = "block";
-            document.getElementById("save-btn").style.display = "block";
-            toggleInputs(false);  // Разрешаем редактирование
-            displayStatus("Вы вошли как администратор", true);
-            loadGrades();  // Загружаем оценки с Firestore
-        } else {
-            displayStatus("Неверный логин или пароль", false);
-        }
-    }
-
-    function guestLogin() {
-        document.getElementById("login-form").style.display = "none";
-        document.getElementById("grades-section").style.display = "block";
-        toggleInputs(true);  // Блокируем редактирование для гостя
-        displayStatus("Вы вошли как гость", true);
-        loadGrades();  // Загружаем оценки с Firestore
-    }
-
-    function toggleInputs(disabled) {
-        const inputs = document.querySelectorAll('input[type="number"]');
-        inputs.forEach(input => {
-            input.disabled = disabled;
-        });
-    }
-
-    async function saveGrades() {
-        const inputs = document.querySelectorAll('input[type="number"]');
-        const grades = {};
-
-        inputs.forEach(input => {
-            const name = input.getAttribute('data-name');
-            const date = input.getAttribute('data-date');
-            const value = input.value;
-
-            if (!grades[name]) {
-                grades[name] = {};
-            }
-            grades[name][date] = value;
-        });
-
-        // Сохраняем оценки в Firestore
-        await db.collection("grades").doc("gradesData").set(grades);
-        displayStatus("Оценки сохранены!", true);
-    }
-
-    async function loadGrades() {
-        // Загружаем оценки из Firestore
-        const doc = await db.collection("grades").doc("gradesData").get();
-        if (doc.exists) {
-            const grades = doc.data();
-            const inputs = document.querySelectorAll('input[type="number"]');
-
-            inputs.forEach(input => {
-                const name = input.getAttribute('data-name');
-                const date = input.getAttribute('data-date');
-                if (grades[name] && grades[name][date]) {
-                    input.value = grades[name][date];
-                }
-            });
-        } else {
-            displayStatus("Нет сохраненных оценок.", false);
-        }
-    }
-
-    function displayStatus(message, success) {
-        const statusDiv = document.getElementById('status');
-        statusDiv.innerText = message;
-        statusDiv.style.color = success ? 'green' : 'red';
-    }
-
-    window.onload = function() {
-        toggleInputs(true);  // По умолчанию все поля заблокированы
-    };
-</script>
 
 </body>
 </html>
