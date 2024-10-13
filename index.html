@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система оценок</title>
     <link rel="stylesheet" href="styles.css"> <!-- Подключение CSS -->
+    <!-- Подключение Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+    <script>
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        // Инициализация Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
 </head>
 <body>
 
@@ -33,7 +50,7 @@
                 <th>04.10.2024</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="grades-body">
             <tr>
                 <td>Есаян Майя</td>
                 <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="01.10.2024"></td>
@@ -76,6 +93,7 @@
             document.getElementById("save-btn").style.display = "block";
             toggleInputs(false);  // Разрешаем редактирование
             displayStatus("Вы вошли как администратор", true);
+            loadGrades();  // Загружаем оценки с Firestore
         } else {
             displayStatus("Неверный логин или пароль", false);
         }
@@ -86,6 +104,7 @@
         document.getElementById("grades-section").style.display = "block";
         toggleInputs(true);  // Блокируем редактирование для гостя
         displayStatus("Вы вошли как гость", true);
+        loadGrades();  // Загружаем оценки с Firestore
     }
 
     function toggleInputs(disabled) {
@@ -95,7 +114,7 @@
         });
     }
 
-    function saveGrades() {
+    async function saveGrades() {
         const inputs = document.querySelectorAll('input[type="number"]');
         const grades = {};
 
@@ -110,14 +129,16 @@
             grades[name][date] = value;
         });
 
-        localStorage.setItem('grades', JSON.stringify(grades));
+        // Сохраняем оценки в Firestore
+        await db.collection("grades").doc("gradesData").set(grades);
         displayStatus("Оценки сохранены!", true);
     }
 
-    function loadGrades() {
-        const savedGrades = localStorage.getItem('grades');
-        if (savedGrades) {
-            const grades = JSON.parse(savedGrades);
+    async function loadGrades() {
+        // Загружаем оценки из Firestore
+        const doc = await db.collection("grades").doc("gradesData").get();
+        if (doc.exists) {
+            const grades = doc.data();
             const inputs = document.querySelectorAll('input[type="number"]');
 
             inputs.forEach(input => {
@@ -127,6 +148,8 @@
                     input.value = grades[name][date];
                 }
             });
+        } else {
+            displayStatus("Нет сохраненных оценок.", false);
         }
     }
 
@@ -137,7 +160,6 @@
     }
 
     window.onload = function() {
-        loadGrades();
         toggleInputs(true);  // По умолчанию все поля заблокированы
     };
 </script>
