@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система оценок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+            font-size: 16px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #guest-btn {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Выставление оценок</h1>
+
+<!-- Логин для админа -->
+<div id="login-form">
+    <h2>Вход для администратора</h2>
+    <label for="login">Логин:</label>
+    <input type="text" id="login"><br>
+    <label for="password">Пароль:</label>
+    <input type="password" id="password"><br>
+    <button onclick="adminLogin()">Войти</button>
+    <div id="login-status"></div>
+    <button id="guest-btn" onclick="guestLogin()">Войти как гость</button>
+</div>
+
+<!-- Таблица оценок -->
+<div id="grades-section" style="display: none;">
+    <table>
+        <thead>
+            <tr>
+                <th>Имя Фамилия</th>
+                <th>01.10.2024</th>
+                <th>02.10.2024</th>
+                <th>03.10.2024</th>
+                <th>04.10.2024</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Есаян Майя</td>
+                <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="01.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="02.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="03.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="04.10.2024"></td>
+            </tr>
+            <tr>
+                <td>Егор Баранов</td>
+                <td><input type="number" min="2" max="5" data-name="egor_baranov" data-date="01.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="egor_baranov" data-date="02.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="egor_baranov" data-date="03.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="egor_baranov" data-date="04.10.2024"></td>
+            </tr>
+            <tr>
+                <td>Маша Михаил</td>
+                <td><input type="number" min="2" max="5" data-name="masha_mikhail" data-date="01.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="masha_mikhail" data-date="02.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="masha_mikhail" data-date="03.10.2024"></td>
+                <td><input type="number" min="2" max="5" data-name="masha_mikhail" data-date="04.10.2024"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button id="save-btn" onclick="saveGrades()">Сохранить оценки</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    const ADMIN_LOGIN = "admin";
+    const ADMIN_PASSWORD = "password";
+
+    // Вход для администратора
+    function adminLogin() {
+        const login = document.getElementById("login").value;
+        const password = document.getElementById("password").value;
+
+        if (login === ADMIN_LOGIN && password === ADMIN_PASSWORD) {
+            document.getElementById("login-form").style.display = "none";
+            document.getElementById("grades-section").style.display = "block";
+            document.getElementById("save-btn").style.display = "block";
+            displayStatus("Вы вошли как администратор", true);
+        } else {
+            displayStatus("Неверный логин или пароль", false);
+        }
+    }
+
+    // Вход для гостя
+    function guestLogin() {
+        document.getElementById("login-form").style.display = "none";
+        document.getElementById("grades-section").style.display = "block";
+        displayStatus("Вы вошли как гость", true);
+    }
+
+    // Сохранение оценок
+    function saveGrades() {
+        displayStatus("Оценки сохранены!", true);
+    }
+
+    // Отображение статуса
+    function displayStatus(message, success) {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerText = message;
+        statusDiv.style.color = success ? 'green' : 'red';
+    }
+</script>
+
+</body>
+</html>
