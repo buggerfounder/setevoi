@@ -76,6 +76,22 @@
             statusDiv.style.color = success ? 'green' : 'red';
         }
 
+        // Добавление новой строки с учеником
+        function addNewStudentRow() {
+            const tableBody = document.querySelector("tbody");
+            const newRow = document.createElement("tr");
+
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="Введите имя" data-name="new_student"></td>
+                <td><input type="text" data-name="new_student" data-date="01.10.2024"></td>
+                <td><input type="text" data-name="new_student" data-date="02.10.2024"></td>
+                <td><input type="text" data-name="new_student" data-date="03.10.2024"></td>
+                <td><input type="text" data-name="new_student" data-date="04.10.2024"></td>
+            `;
+
+            tableBody.appendChild(newRow);
+        }
+
         window.onload = function() {
             loadGrades();
         };
@@ -111,21 +127,21 @@
         </thead>
         <tbody>
             <tr>
-                <td>Есаян Майя</td>
+                <td><input type="text" value="Есаян Майя" data-name="esayan_maya"></td>
                 <td><input type="text" data-name="esayan_maya" data-date="01.10.2024"></td>
                 <td><input type="text" data-name="esayan_maya" data-date="02.10.2024"></td>
                 <td><input type="text" data-name="esayan_maya" data-date="03.10.2024"></td>
                 <td><input type="text" data-name="esayan_maya" data-date="04.10.2024"></td>
             </tr>
             <tr>
-                <td>Егор Баранов</td>
+                <td><input type="text" value="Егор Баранов" data-name="egor_baranov"></td>
                 <td><input type="text" data-name="egor_baranov" data-date="01.10.2024"></td>
                 <td><input type="text" data-name="egor_baranov" data-date="02.10.2024"></td>
                 <td><input type="text" data-name="egor_baranov" data-date="03.10.2024"></td>
                 <td><input type="text" data-name="egor_baranov" data-date="04.10.2024"></td>
             </tr>
             <tr>
-                <td>Маша Михаил</td>
+                <td><input type="text" value="Маша Михаил" data-name="masha_mikhail"></td>
                 <td><input type="text" data-name="masha_mikhail" data-date="01.10.2024"></td>
                 <td><input type="text" data-name="masha_mikhail" data-date="02.10.2024"></td>
                 <td><input type="text" data-name="masha_mikhail" data-date="03.10.2024"></td>
@@ -134,6 +150,7 @@
         </tbody>
     </table>
 
+    <button onclick="addNewStudentRow()">Добавить нового ученика</button>
     <button id="save-btn" onclick="saveGrades()">Сохранить оценки</button>
     <div id="status"></div>
 </div>
