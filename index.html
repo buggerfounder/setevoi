@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOT REAL SGO</title>
+    <title>Система оценок</title>
+
+    <!-- Подключение стилей -->
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Подключение Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
     <script>
-        // Firebase конфигурация
         const firebaseConfig = {
             apiKey: "AIzaSyCfII279Y-Np3by_EOAu37dUfYe7-APdZg",
             authDomain: "setevoigorod-7d5a8.firebaseapp.com",
@@ -22,30 +25,8 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Вход для администратора
-        function adminLogin() {
-            const login = document.getElementById('login').value;
-            const password = document.getElementById('password').value;
-
-            if (login === "Cobaken555" && password === "Mazda371") {
-                document.getElementById('grades-section').style.display = 'block';
-                document.getElementById('save-btn').style.display = 'block';
-                document.getElementById('login-form').style.display = 'none';
-            } else {
-                document.getElementById('login-status').innerText = 'Неверные данные!';
-            }
-        }
-
-        // Вход как гость
-        function guestLogin() {
-            document.getElementById('grades-section').style.display = 'block';
-            document.getElementById('save-btn').style.display = 'none';
-            document.getElementById('login-form').style.display = 'none';
-        }
-
-        // Сохранение оценок и домашнего задания
         function saveGrades() {
-            const inputs = document.querySelectorAll('input[type="text"]');
+            const inputs = document.querySelectorAll('input[type="number"], input[type="text"]');
             const grades = {};
 
             inputs.forEach(input => {
@@ -60,17 +41,17 @@
 
                 db.collection("grades").doc(name).set(grades[name])
                     .then(() => {
-                        displayStatus("Оценки и задания сохранены!", true);
+                        displayStatus("Оценки сохранены!", true);
                     })
                     .catch((error) => {
-                        displayStatus("Ошибка при сохранении!", false);
+                        console.error("Ошибка при сохранении оценок: ", error);
+                        displayStatus("Ошибка при сохранении оценок!", false);
                     });
             });
         }
 
-        // Загрузка оценок и домашних заданий
         function loadGrades() {
-            const inputs = document.querySelectorAll('input[type="text"]');
+            const inputs = document.querySelectorAll('input[type="number"], input[type="text"]');
 
             inputs.forEach(input => {
                 const name = input.getAttribute('data-name');
@@ -83,77 +64,28 @@
                             input.value = data[date];
                         }
                     }
+                }).catch((error) => {
+                    console.error("Ошибка при загрузке оценок: ", error);
                 });
             });
         }
 
-        // Отображение статуса сохранения
         function displayStatus(message, success) {
             const statusDiv = document.getElementById('status');
             statusDiv.innerText = message;
             statusDiv.style.color = success ? 'green' : 'red';
         }
 
-        // Проверка вводимого значения в поле оценки
-        function validateGradeInput(input) {
-            const value = input.value;
-            const isValid = value === '' || value === 'н' || value === 'Н' || (Number(value) >= 2 && Number(value) <= 5);
-
-            if (!isValid) {
-                input.style.border = '2px solid red';
-                displayStatus("Введите правильную оценку (2-5) или н/Н!", false);
-            } else {
-                input.style.border = '';
-                displayStatus("", true);
-            }
-        }
-
-        // Загрузка при загрузке страницы
         window.onload = function() {
             loadGrades();
         };
     </script>
-    <style>
-        body {
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
-        #header {
-            background-color: #0d6efd;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 24px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 5px;
-        }
-        #save-btn {
-            background-color: #0d6efd;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-        }
-        #save-btn:hover {
-            background-color: #0a58ca;
-        }
-    </style>
 </head>
 <body>
 
-<div id="header">NOT REAL SGO</div>
+<h1>NOT REAL SGO</h1>
 
-<!-- Логин для администратора -->
+<!-- Логин для админа -->
 <div id="login-form">
     <h2>Вход для администратора</h2>
     <label for="login">Логин:</label>
@@ -165,31 +97,44 @@
     <button id="guest-btn" onclick="guestLogin()">Войти как гость</button>
 </div>
 
-<!-- Таблица оценок и домашнего задания -->
+<!-- Таблица оценок -->
 <div id="grades-section" style="display: none;">
     <table>
         <thead>
             <tr>
                 <th>Имя Фамилия</th>
-                <th>Домашнее задание (01.10.2024)</th>
-                <th>Оценка (01.10.2024)</th>
-                <th>Домашнее задание (02.10.2024)</th>
-                <th>Оценка (02.10.2024)</th>
+                <th>01.10.2024</th>
+                <th>02.10.2024</th>
+                <th>03.10.2024</th>
+                <th>04.10.2024</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>Есаян Майя</td>
                 <td><input type="text" data-name="esayan_maya" data-date="01.10.2024"></td>
-                <td><input type="text" data-name="esayan_maya" data-date="grade_01.10.2024" oninput="validateGradeInput(this)"></td>
                 <td><input type="text" data-name="esayan_maya" data-date="02.10.2024"></td>
-                <td><input type="text" data-name="esayan_maya" data-date="grade_02.10.2024" oninput="validateGradeInput(this)"></td>
+                <td><input type="text" data-name="esayan_maya" data-date="03.10.2024"></td>
+                <td><input type="text" data-name="esayan_maya" data-date="04.10.2024"></td>
             </tr>
-            <!-- Добавьте остальные строки для других учеников -->
+            <tr>
+                <td>Егор Баранов</td>
+                <td><input type="text" data-name="egor_baranov" data-date="01.10.2024"></td>
+                <td><input type="text" data-name="egor_baranov" data-date="02.10.2024"></td>
+                <td><input type="text" data-name="egor_baranov" data-date="03.10.2024"></td>
+                <td><input type="text" data-name="egor_baranov" data-date="04.10.2024"></td>
+            </tr>
+            <tr>
+                <td>Маша Михаил</td>
+                <td><input type="text" data-name="masha_mikhail" data-date="01.10.2024"></td>
+                <td><input type="text" data-name="masha_mikhail" data-date="02.10.2024"></td>
+                <td><input type="text" data-name="masha_mikhail" data-date="03.10.2024"></td>
+                <td><input type="text" data-name="masha_mikhail" data-date="04.10.2024"></td>
+            </tr>
         </tbody>
     </table>
 
-    <button id="save-btn" onclick="saveGrades()">Сохранить оценки и задания</button>
+    <button id="save-btn" onclick="saveGrades()">Сохранить оценки</button>
     <div id="status"></div>
 </div>
 
