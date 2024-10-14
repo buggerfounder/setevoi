@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система оценок</title>
+    <title>NOT REAL SGO</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Подключение Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
     <script>
-        // Ваша конфигурация Firebase
+        // Firebase конфигурация
         const firebaseConfig = {
             apiKey: "AIzaSyCfII279Y-Np3by_EOAu37dUfYe7-APdZg",
             authDomain: "setevoigorod-7d5a8.firebaseapp.com",
@@ -20,43 +19,33 @@
             measurementId: "G-WNFHGTHGFS"
         };
 
-        // Инициализация Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Функция для обновления количества активных пользователей
-        function updateActiveUsers(count) {
-            document.getElementById('active-users').innerText = `Пользователей онлайн: ${count}`;
-        }
+        // Вход для администратора
+        function adminLogin() {
+            const login = document.getElementById('login').value;
+            const password = document.getElementById('password').value;
 
-        // Функция для увеличения и уменьшения счетчика активных пользователей
-        function updateUserCount(isJoining) {
-            const userRef = db.collection("activeUsers").doc("userCount");
-
-            if (isJoining) {
-                userRef.update({ count: firebase.firestore.FieldValue.increment(1) });
+            if (login === "Cobaken555" && password === "Mazda371") {
+                document.getElementById('grades-section').style.display = 'block';
+                document.getElementById('save-btn').style.display = 'block';
+                document.getElementById('login-form').style.display = 'none';
             } else {
-                userRef.update({ count: firebase.firestore.FieldValue.increment(-1) });
+                document.getElementById('login-status').innerText = 'Неверные данные!';
             }
         }
 
-        // Функция для получения количества активных пользователей
-        function getActiveUsers() {
-            const userRef = db.collection("activeUsers").doc("userCount");
-            userRef.get().then((doc) => {
-                if (doc.exists) {
-                    updateActiveUsers(doc.data().count);
-                } else {
-                    userRef.set({ count: 0 });
-                }
-            }).catch((error) => {
-                console.error("Ошибка при получении активных пользователей: ", error);
-            });
+        // Вход как гость
+        function guestLogin() {
+            document.getElementById('grades-section').style.display = 'block';
+            document.getElementById('save-btn').style.display = 'none';
+            document.getElementById('login-form').style.display = 'none';
         }
 
-        // Функция для сохранения оценок
+        // Сохранение оценок и домашнего задания
         function saveGrades() {
-            const inputs = document.querySelectorAll('input[type="number"]');
+            const inputs = document.querySelectorAll('input[type="text"]');
             const grades = {};
 
             inputs.forEach(input => {
@@ -69,21 +58,19 @@
                 }
                 grades[name][date] = value;
 
-                // Сохранение оценок в Firestore
                 db.collection("grades").doc(name).set(grades[name])
                     .then(() => {
-                        displayStatus("Оценки сохранены!", true);
+                        displayStatus("Оценки и задания сохранены!", true);
                     })
                     .catch((error) => {
-                        console.error("Ошибка при сохранении оценок: ", error);
-                        displayStatus("Ошибка при сохранении оценок!", false);
+                        displayStatus("Ошибка при сохранении!", false);
                     });
             });
         }
 
-        // Функция для загрузки оценок из Firestore
+        // Загрузка оценок и домашних заданий
         function loadGrades() {
-            const inputs = document.querySelectorAll('input[type="number"]');
+            const inputs = document.querySelectorAll('input[type="text"]');
 
             inputs.forEach(input => {
                 const name = input.getAttribute('data-name');
@@ -96,40 +83,77 @@
                             input.value = data[date];
                         }
                     }
-                }).catch((error) => {
-                    console.error("Ошибка при загрузке оценок: ", error);
                 });
             });
         }
 
-        // Отображение статуса
+        // Отображение статуса сохранения
         function displayStatus(message, success) {
             const statusDiv = document.getElementById('status');
             statusDiv.innerText = message;
             statusDiv.style.color = success ? 'green' : 'red';
         }
 
-        // Загрузка оценок и активных пользователей при загрузке страницы
+        // Проверка вводимого значения в поле оценки
+        function validateGradeInput(input) {
+            const value = input.value;
+            const isValid = value === '' || value === 'н' || value === 'Н' || (Number(value) >= 2 && Number(value) <= 5);
+
+            if (!isValid) {
+                input.style.border = '2px solid red';
+                displayStatus("Введите правильную оценку (2-5) или н/Н!", false);
+            } else {
+                input.style.border = '';
+                displayStatus("", true);
+            }
+        }
+
+        // Загрузка при загрузке страницы
         window.onload = function() {
             loadGrades();
-            getActiveUsers();
-            updateUserCount(true); // Увеличиваем счетчик при входе
-
-            // Удаляем пользователя из активных при закрытии окна
-            window.addEventListener("beforeunload", () => {
-                updateUserCount(false);
-            });
         };
     </script>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #header {
+            background-color: #0d6efd;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 5px;
+        }
+        #save-btn {
+            background-color: #0d6efd;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        #save-btn:hover {
+            background-color: #0a58ca;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Выставление оценок</h1>
+<div id="header">NOT REAL SGO</div>
 
-<!-- Количество пользователей онлайн -->
-<div id="active-users" style="font-size: 18px; margin-bottom: 20px;"></div>
-
-<!-- Логин для админа -->
+<!-- Логин для администратора -->
 <div id="login-form">
     <h2>Вход для администратора</h2>
     <label for="login">Логин:</label>
@@ -141,44 +165,31 @@
     <button id="guest-btn" onclick="guestLogin()">Войти как гость</button>
 </div>
 
-<!-- Таблица оценок -->
+<!-- Таблица оценок и домашнего задания -->
 <div id="grades-section" style="display: none;">
     <table>
         <thead>
             <tr>
                 <th>Имя Фамилия</th>
-                <th>01.10.2024</th>
-                <th>02.10.2024</th>
-                <th>03.10.2024</th>
-                <th>04.10.2024</th>
+                <th>Домашнее задание (01.10.2024)</th>
+                <th>Оценка (01.10.2024)</th>
+                <th>Домашнее задание (02.10.2024)</th>
+                <th>Оценка (02.10.2024)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>Есаян Майя</td>
-                <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="01.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="02.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="03.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="esayan_maya" data-date="04.10.2024"></td>
+                <td><input type="text" data-name="esayan_maya" data-date="01.10.2024"></td>
+                <td><input type="text" data-name="esayan_maya" data-date="grade_01.10.2024" oninput="validateGradeInput(this)"></td>
+                <td><input type="text" data-name="esayan_maya" data-date="02.10.2024"></td>
+                <td><input type="text" data-name="esayan_maya" data-date="grade_02.10.2024" oninput="validateGradeInput(this)"></td>
             </tr>
-            <tr>
-                <td>Егор Баранов</td>
-                <td><input type="number" min="2" max="5" data-name="egor_baranov" data-date="01.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="egor_baranov" data-date="02.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="egor_baranov" data-date="03.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="egor_baranov" data-date="04.10.2024"></td>
-            </tr>
-            <tr>
-                <td>Маша Михаил</td>
-                <td><input type="number" min="2" max="5" data-name="masha_mikhail" data-date="01.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="masha_mikhail" data-date="02.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="masha_mikhail" data-date="03.10.2024"></td>
-                <td><input type="number" min="2" max="5" data-name="masha_mikhail" data-date="04.10.2024"></td>
-            </tr>
+            <!-- Добавьте остальные строки для других учеников -->
         </tbody>
     </table>
 
-    <button id="save-btn" onclick="saveGrades()" style="display: none;">Сохранить оценки</button>
+    <button id="save-btn" onclick="saveGrades()">Сохранить оценки и задания</button>
     <div id="status"></div>
 </div>
 
